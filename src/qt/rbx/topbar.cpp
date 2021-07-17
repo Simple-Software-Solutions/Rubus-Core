@@ -161,6 +161,7 @@ void TopBar::onThemeClicked()
     bool lightTheme = false;
 
     setTheme(lightTheme);
+
     updateStyle(ui->pushButtonTheme);
 
     Q_EMIT themeChanged(lightTheme);

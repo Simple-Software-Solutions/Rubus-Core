@@ -3781,7 +3781,6 @@ UniValue burn(const UniValue& params, bool fHelp)
     return wtx.GetHash().GetHex();
 }
 
-
 UniValue getwalletinfo(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 0)
