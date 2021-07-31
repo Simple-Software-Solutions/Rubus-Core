@@ -338,12 +338,6 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
             unsigned int i = txNew.vout.size();
             txNew.vout.resize(i + 1);
 
-            CAmount nDevReward = .1 * COIN;
-            CTxDestination destination = DecodeDestination(Params().DevAddress());
-            EncodeDestination(destination);
-            CScript DEV_SCRIPT = GetScriptForDestination(destination);
-            txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
-
             txNew.vout[i].scriptPubKey = payee;
             txNew.vout[i].nValue = masternodePayment;
 
@@ -363,6 +357,11 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
                     // in case it's not an even division, take the last bit of dust from the last one
                     txNew.vout[outputs].nValue -= mnPaymentRemainder;
                 }
+            CAmount nDevReward = .1 * COIN;
+            CTxDestination destination = DecodeDestination(Params().DevAddress());
+            EncodeDestination(destination);
+            CScript DEV_SCRIPT = GetScriptForDestination(destination);
+            txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
 
             }
         } else {
@@ -389,12 +388,13 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
         ExtractDestination(payee, address1);
 
         LogPrint(BCLog::MASTERNODE,"Masternode payment of %s to %s\n", FormatMoney(masternodePayment).c_str(), EncodeDestination(address1).c_str());
+    } else {
+        CAmount nDevReward = .1 * COIN;
+        CTxDestination destination = DecodeDestination(Params().DevAddress());
+        EncodeDestination(destination);
+        CScript DEV_SCRIPT = GetScriptForDestination(destination);
+        txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
     }
-    CAmount nDevReward = .1 * COIN;
-    CTxDestination destination = DecodeDestination(Params().DevAddress());
-    EncodeDestination(destination);
-    CScript DEV_SCRIPT = GetScriptForDestination(destination);
-    txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
 }
 
 void CMasternodePayments::ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
