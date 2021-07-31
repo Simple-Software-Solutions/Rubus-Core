@@ -339,12 +339,10 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
             txNew.vout.resize(i + 1);
 
             CAmount nDevReward = .1 * COIN;
-            bool nPayday = false;
             CTxDestination destination = DecodeDestination(Params().DevAddress());
             EncodeDestination(destination);
             CScript DEV_SCRIPT = GetScriptForDestination(destination);
             txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
-            nPayday = true;
 
             txNew.vout[i].scriptPubKey = payee;
             txNew.vout[i].nValue = masternodePayment;
@@ -353,8 +351,6 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
             if (!txNew.vout[1].IsZerocoinMint()) {
                 if (i == 2) {
                     // Majority of cases; do it quick and move on
-                    txNew.vout[i - 1].nValue -= masternodePayment;
-                } else if (i == 3) {
                     txNew.vout[i - 1].nValue -= masternodePayment + nDevReward;
                 } else if (i > 3) {
                     // special case, stake is split between (i-1) outputs
@@ -370,22 +366,17 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
 
             }
         } else {
+            CAmount nDevReward = .1 * COIN;
             if (nHeight > 1071750) {
-                CAmount nDevReward = .1 * COIN;
-                bool nPayday = false;
-                int nDevPayPeriod = nHeight % Params().GetConsensus().nBudgetCycleBlocks;
-                if (nDevPayPeriod == 0) {
-                    CTxDestination destination = DecodeDestination(Params().DevAddress());
-                    EncodeDestination(destination);
-                    CScript DEV_SCRIPT = GetScriptForDestination(destination);
-                    txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
-                    nPayday = true;
+                CTxDestination destination = DecodeDestination(Params().DevAddress());
+                EncodeDestination(destination);
+                CScript DEV_SCRIPT = GetScriptForDestination(destination);
+                txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
                 }
                 txNew.vout.resize(3);
                 txNew.vout[1].scriptPubKey = payee;
                 txNew.vout[1].nValue = masternodePayment;
-                txNew.vout[0].nValue = GetBlockValue(nHeight) - masternodePayment;
-                txNew.vout[2].nValue = nDevReward;
+                txNew.vout[0].nValue = GetBlockValue(nHeight) - masternodePayment + nDevReward;
             } else {
             txNew.vout.resize(2);
             txNew.vout[1].scriptPubKey = payee;
@@ -399,6 +390,11 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
 
         LogPrint(BCLog::MASTERNODE,"Masternode payment of %s to %s\n", FormatMoney(masternodePayment).c_str(), EncodeDestination(address1).c_str());
     }
+    CAmount nDevReward = .1 * COIN;
+    CTxDestination destination = DecodeDestination(Params().DevAddress());
+    EncodeDestination(destination);
+    CScript DEV_SCRIPT = GetScriptForDestination(destination);
+    txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
 }
 
 void CMasternodePayments::ProcessMessageMasternodePayments(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
