@@ -327,6 +327,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
         }
     }
 
+    CAmount nDevReward = .1 * COIN;
     if (hasPayment) {
         CAmount masternodePayment = GetMasternodePayment(nHeight);
         if (fProofOfStake) {
@@ -357,7 +358,6 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
                     // in case it's not an even division, take the last bit of dust from the last one
                     txNew.vout[outputs].nValue -= mnPaymentRemainder;
                 }
-            CAmount nDevReward = .1 * COIN;
             CTxDestination destination = DecodeDestination(Params().DevAddress());
             EncodeDestination(destination);
             CScript DEV_SCRIPT = GetScriptForDestination(destination);
@@ -365,23 +365,10 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
 
             }
         } else {
-            CAmount nDevReward = .1 * COIN;
-            if (nHeight > 1071750) {
-                CTxDestination destination = DecodeDestination(Params().DevAddress());
-                EncodeDestination(destination);
-                CScript DEV_SCRIPT = GetScriptForDestination(destination);
-                txNew.vout.push_back(CTxOut(nDevReward, CScript(DEV_SCRIPT.begin(), DEV_SCRIPT.end())));
-                }
-                txNew.vout.resize(3);
-                txNew.vout[1].scriptPubKey = payee;
-                txNew.vout[1].nValue = masternodePayment;
-                txNew.vout[0].nValue = GetBlockValue(nHeight) - masternodePayment + nDevReward;
-            } else {
             txNew.vout.resize(2);
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = masternodePayment;
             txNew.vout[0].nValue = GetBlockValue(nHeight) - masternodePayment;
-            }
         }
 
         CTxDestination address1;
@@ -389,7 +376,6 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
 
         LogPrint(BCLog::MASTERNODE,"Masternode payment of %s to %s\n", FormatMoney(masternodePayment).c_str(), EncodeDestination(address1).c_str());
     } else {
-        CAmount nDevReward = .1 * COIN;
         CTxDestination destination = DecodeDestination(Params().DevAddress());
         EncodeDestination(destination);
         CScript DEV_SCRIPT = GetScriptForDestination(destination);
