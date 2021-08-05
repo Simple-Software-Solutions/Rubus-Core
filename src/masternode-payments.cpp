@@ -347,7 +347,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, const int n
                 if (i == 2) {
                     // Majority of cases; do it quick and move on
                     txNew.vout[i - 1].nValue -= masternodePayment + nDevReward;
-                } else if (i > 3) {
+                } else if (i >= 3) {
                     // special case, stake is split between (i-1) outputs
                     unsigned int outputs = i-1;
                     CAmount devFeeSplit = nDevReward / outputs;
